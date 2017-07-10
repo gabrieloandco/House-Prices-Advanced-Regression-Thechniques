@@ -46,11 +46,11 @@ PA = linear_model.PassiveAggressiveRegressor()
 RANSAC = linear_model.RANSACRegressor()
 Gboost = ensemble.GradientBoostingRegressor()
 algorithms = {'Linear Regression':LinRe, 
-              #'Bayesian ARD regression':ARD, 
+              'Bayesian ARD regression':ARD, 
               'BayesianRidge': BR,'Lars': Lars,
-              #'Lasso':Lasso, 
-              #'PassiveAggressiveRegressor':PA ,
-              #'RANSACRegressor':RANSAC,
+              'Lasso':Lasso, 
+              'PassiveAggressiveRegressor':PA ,
+              'RANSACRegressor':RANSAC,
               'GradientBoostingRegressor':Gboost
               }
 

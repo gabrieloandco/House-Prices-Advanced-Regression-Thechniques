@@ -8,7 +8,7 @@ def ChoosingHousingFeatures(data,meanlimit,varlimit):
     features = []
     
     for column in data:
-        normalizedcolumn = (data[column] - data[column].min()+1e-10)/(data[column].max()-data[column].min())
+        normalizedcolumn = data[column]/data[column].max()
         if normalizedcolumn.mean()>meanlimit and normalizedcolumn.var() > varlimit:
             features.append(column)
     
@@ -50,6 +50,7 @@ def CleanHousingData(data):
     return data
 
 def NormalizeHousingData(data):
+    data = np.log1p(data)
     
     return data
 
@@ -70,6 +71,7 @@ def NormalizeHousingData(data):
                     data[column] = (data[column] - data[column].min()+1)/(data[column].max()-data[column].min()+2)
     '''
 def DeNormalizeHousingData(data):
+    data = np.expm1(data)
     
     return data
 

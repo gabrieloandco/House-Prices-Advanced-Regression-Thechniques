@@ -31,7 +31,7 @@ features = list(tr_data.columns[1:].values)
 features.remove('SalePrice')
 
 #Split the data with the folds
-kf = KFold(n_splits=3, random_state=1, shuffle=True)
+kf = KFold(n_splits=11, random_state=1, shuffle=True) #Converge score algorithm for many spolits
 for train_index, test_index in kf.split(tr_data):
     trainsplit = tr_data.iloc[train_index,:] 
     testsplit =  tr_data.iloc[test_index,:] 
@@ -41,11 +41,15 @@ Ntestsplit = NormalizeHousingData(testsplit)
 #Finding out which algorithm adjusts better to the data
 #Create the algorithm dictionary
 LR= linear_model.LinearRegression()
+BR = linear_model.BayesianRidge()
 Gboost = ensemble.GradientBoostingRegressor()
-algorithms = [ Gboost, LR]
-names = ['Gradient Boosting', 'Linear Regression']
-
-predictors = ChoosingHousingFeatures(tr_data,0.001,0.0005)
+LA = linear_model.Lars()
+ET = ensemble.ExtraTreesRegressor()
+#EN= ensemble.BaggingRegressor(base_estimator =LA )
+algorithms = [ Gboost, LR,BR, LA,ET]
+names = ['Gradient Boosting', 'Linear Regression','BayesianRisdge','Lars','ExtraTreesRegressor','BaggingRegressor']
+weights = [7,3,1,1,1]
+predictors = ChoosingHousingFeatures(tr_data,0.00001,0.000005)
 predictors.remove('SalePrice')
 allOutputs = []
 
@@ -61,16 +65,19 @@ for i in range(len(algorithms)):
     varscore = explained_variance_score(testsplit['SalePrice'], Output)
     print(names[i] + ' ' + ' Variance score: %.3f' % varscore)
 
-
-
 #Average
 prediction = np.zeros(len(allOutputs[0]))
 for i in range(len(allOutputs[0])):
-    prediction[i] = (4*allOutputs[0][i] + allOutputs[1][i])/5
-
+    
+    for j in range(len(algorithms)):
+        prediction[i] += weights[j]*allOutputs[j][i]
+        
+    prediction[i] = prediction[i]/sum(weights)
+    
 Mean = mean_absolute_error(testsplit['SalePrice'],prediction)
 print('Mean error: %f' % Mean) 
 Score = explained_variance_score(testsplit['SalePrice'],prediction)
+print('Weights: ' + str(weights))
 print('Average score: %f' % Score)  
  
 
@@ -87,7 +94,11 @@ for i in range(len(algorithms)):
 
 test_predictions = np.zeros(len(alltestOutputs[0]))
 for i in range(len(alltestOutputs[0])):
-    test_predictions[i] = (4*alltestOutputs[0][i] + alltestOutputs[1][i])/5
+    
+    for j in range(len(algorithms)):
+        test_predictions[i] += weights[j]*alltestOutputs[j][i]
+        
+    test_predictions[i] = test_predictions[i]/sum(weights)
 
 submission = pd.DataFrame({
         "Id": test_data["Id"],
